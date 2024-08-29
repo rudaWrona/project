@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Survey Generator
+{% endblock %}
+
+{% block header %}
+    <p class="popup">Generate a survey</p>
+{% endblock %}
+
+{% block main %}
+
+<fieldset class="fieldset">
+    <div class="mb-3">
+    <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="option" placeholder="Option" type="text">
+    </div>
+    <button class="btn btn-primary" onclick="add_option()">Add an option</button>
+</fieldset>
+
+<fieldset class="fieldset">
+    <legend>Provide options for your survey</legend>
+    <form action="/generate" method="post">
+        <div>
+            <ol id="options_list" style="list-style-position: inside;">
+            </ol>
+        </div>
+        <button class="btn btn-primary" type="submit">Make a survey</button>
+    </form>
+</fieldset>
+{% endblock %}
+
+{% block script %}
+    <script>
+        function add_option() {
+            let option = document.getElementById("option").value;
+            let list = document.getElementById("options_list");
+            let new_item = document.createElement("li");
+            list.appendChild(new_item);
+            let form_option = document.createElement("input");
+            form_option.setAttribute("type", "text"); //A.I. helped with setting the attributes for newly created elements
+            form_option.setAttribute("readonly", true);
+            form_option.setAttribute("name", "option");
+            form_option.value = option;
+            new_item.appendChild(form_option);
+            document.getElementById("option").value = "";
+        }
+    </script>
+{% endblock %}

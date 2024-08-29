@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Register
+{% endblock %}
+
+{% block header %}
+    <p class="popup">{{ warning }}</p>
+{% endblock %}
+
+{% block main %}
+    <fieldset class="fieldset">
+        <legend>Register to Online Survey Generator</legend>
+        <form action="/register" method="post">
+            <div class="mb-3">
+                <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="username" placeholder="Username" type="text">
+            </div>
+            <div class="mb-3">
+                <input class="form-control mx-auto w-auto" name="password" placeholder="Password" type="text">
+            </div>
+            <div class="mb-3">
+                <input class="form-control mx-auto w-auto" name="confirmation" placeholder="Repeat password" type="text">
+            </div>
+            <button class="btn btn-primary" type="submit">Register</button>
+        </form>
+    </fieldset>
+{% endblock %}
