@@ -9,24 +9,38 @@
 {% endblock %}
 
 {% block main %}
-
 <fieldset class="fieldset">
+    <legend>
+        Provide options for you survey
+    </legend>
     <div class="mb-3">
-    <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="option" placeholder="Option" type="text">
+         <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="option" placeholder="Option" type="text">
     </div>
     <button class="btn btn-primary" onclick="add_option()">Add an option</button>
 </fieldset>
-
-<fieldset class="fieldset">
-    <legend>Provide options for your survey</legend>
-    <form action="/generate" method="post">
-        <div>
-            <ol id="options_list" style="list-style-position: inside;">
-            </ol>
-        </div>
+<br>
+<form action="/generate" method="post">
+    <fieldset class="fieldset">
+        <legend>
+            This option will be added to you survey:
+        </legend>
+            <div>
+                <ol id="options_list" style="list-style-position: inside;">
+                </ol>
+            </div>
+    </fieldset>
+    <br>
+    <fieldset class="fieldset">
+        <legend>
+            Enter question for your survey
+        </legend>
+        <input type="text" name="question">
+    </fieldset>
+    <br>
+    <div class="fieldset">
         <button class="btn btn-primary" type="submit">Make a survey</button>
-    </form>
-</fieldset>
+    </div>
+</form>
 {% endblock %}
 
 {% block script %}
