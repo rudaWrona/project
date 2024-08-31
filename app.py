@@ -40,6 +40,30 @@ def generate():
     
     if request.method == "GET":
         return render_template("generate.html")
+    
+    else:
+        question = request.form.get("question")
+        options = request.form.getlist("option")
+        time = datetime.now()
+
+        if len(options) < 2:
+            warning = "Please add at least two options for the survey"
+            return render_template("generate.html", warning=warning)
+        if not question:
+            warning = "Please provide a question for your survey"
+            return render_template("generate.html", warning=warning)
+        
+        db.execute("INSERT INTO surveys (creator, question, time) VALUES (?, ?, ?)",
+                       session["user_id"], question, time)
+        
+        survey = db.execute("SELECT id FROM surveys WHERE time = ?", time)[0]['id']
+        
+        for option in options:
+            db.execute("INSERT INTO options (survey, option) VALUES (?, ?)",
+                       survey, option)
+
+
+        return render_template("index.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
