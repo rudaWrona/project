@@ -10,20 +10,27 @@
 {% endblock %}
 
 {% block main %}
-<fieldset class="fieldset">
-    <legend>
-        Provide options for you survey
-    </legend>
-    <div class="mb-3">
-         <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="option" placeholder="Option" type="text">
-    </div>
-    <button class="btn btn-primary" onclick="add_option()">Add an option</button>
-</fieldset>
-<br>
 <form action="/generate" method="post">
     <fieldset class="fieldset">
         <legend>
-            This option will be added to you survey:
+            Enter question for your survey
+        </legend>
+        <input autofocus type="text" name="question" id="questionField">
+    </fieldset>
+    <br>
+    <fieldset class="fieldset">
+        <legend>
+            Provide options for you survey
+        </legend>
+        <div class="mb-3">
+             <input autocomplete="off" class="form-control mx-auto w-auto" id="option" placeholder="Option" type="text">
+        </div>
+        <button class="btn btn-primary" type="button" onclick="add_option()">Add an option</button>
+    </fieldset>
+    <br>
+    <fieldset class="fieldset">
+        <legend>
+            This option will be added to your survey:
         </legend>
             <div>
                 <ol id="options_list" style="list-style-position: inside;">
@@ -31,17 +38,11 @@
             </div>
     </fieldset>
     <br>
-    <fieldset class="fieldset">
-        <legend>
-            Enter question for your survey
-        </legend>
-        <input type="text" name="question">
-    </fieldset>
-    <br>
     <div class="fieldset">
         <button class="btn btn-primary" type="submit">Make a survey</button>
     </div>
 </form>
+
 {% endblock %}
 
 {% block script %}
@@ -58,6 +59,14 @@
             form_option.value = option;
             new_item.appendChild(form_option);
             document.getElementById("option").value = "";
-        }
+            let deleteButton = document.createElement("span")
+            new_item.appendChild(deleteButton);
+            deleteButton.textContent = "Delete"
+            deleteButton.setAttribute("class", "deleteButton")
+        
+            deleteButton.addEventListener("click", function() {
+                list.removeChild(new_item);
+            });
+        }    
     </script>
 {% endblock %}
