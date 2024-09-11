@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Results
+{% endblock %}
+
+{% block header %}
+    <h2 class="popup">{{ question }}</h2>
+{% endblock %}
+
+{% block main %}
+    <canvas id="chart"></canvas>
+{% endblock %}
+
+{% block script %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        var labels = {{ labels | tojson }};
+        var points = {{ votes | tojson }};
+        var ctx = document.getElementById('chart').getContext('2d');
+        var chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Survey results',
+                    data: points,
+                    backgroundColor: 'rgba(100,100,100, 0.6)',
+                    borderColor: 'rgba(200,200,200, 1)',
+                    borderWidth: 1
+                }]
+            },
+        });
+    </script>
+{% endblock %}

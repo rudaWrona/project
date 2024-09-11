@@ -1,7 +1,7 @@
 import os #module, which provides a way to interact with the operating system
 
 from cs50 import SQL
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, redirect, render_template, request, session, url_for
 from flask_session import Session #a tool for session administering on the server side
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
@@ -24,6 +24,8 @@ def after_request(response):
     response.headers["Expires"] = 0
     response.headers["Pragma"] = "no-cache"
     return response
+
+OPTIONS = []
 
 @app.route("/")
 #decorator calls function which wraps the original defined below with additional logic
@@ -63,7 +65,7 @@ def generate():
                        survey, option)
 
 
-        return render_template("index.html")
+        return redirect("/surveys")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -138,6 +140,121 @@ def register():
             warning = "Username taken"
             return render_template("register.html", warning=warning)
         
-#this should make the aplication update automaticly when working after changes but does not.
+@app.route("/results", methods=["GET", "POST"])
+@login_required
+def results():
+
+    if request.method == "POST":
+
+        global OPTIONS
+        chosen = request.form.get("chosen")
+        survey = request.form.get("survey")
+        check_vote = db.execute("SELECT * FROM voted WHERE user = ? AND survey = ?", session["user_id"], survey)
+        question = db.execute("SELECT question FROM surveys WHERE id = ?", survey)[0]['question']
+        labels_dict = db.execute("SELECT option FROM options WHERE survey = ?", survey)
+        labels = []
+        for label in labels_dict:
+            labels.append(label['option'])
+        votes = []
+        votes_dict = db.execute("SELECT points FROM options WHERE survey= ?", survey)
+        for vote in votes_dict:
+            votes.append(vote['points'])
+
+        #Verifies if the option which was sent is available for this survey
+        if chosen not in OPTIONS:
+            warning = "Failure. Option not available for this survey."
+            return render_template("failure.html", warning=warning)
+        #Checks wether the user has voted in this survey
+        elif len(check_vote) > 0:
+            warning = "Failure. You have already voted in this survey."
+            return render_template("failure.html", warning=warning)
+            
+        #Registers the vote and that the user voted in this survey
+        else:
+            db.execute("INSERT INTO voted (user, survey) VALUES(?, ?)", session["user_id"], survey)
+            db.execute("UPDATE options SET points = points + 1 WHERE survey = ? AND option = ?", survey, chosen)
+            votes = []
+            votes_dict = db.execute("SELECT points FROM options WHERE survey= ?", survey)
+            for vote in votes_dict:
+                votes.append(vote['points'])
+
+            return render_template('results.html', question=question, labels=labels, votes=votes)
+    else:
+        return render_template('results.html', question=question, labels=labels, votes=votes)
+
+@app.route("/surveys", methods=["GET", "POST"])
+@login_required
+def surveys():
+
+    if request.method == "GET":
+        # A.I helped with aliasing the AQL query
+        surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator")
+        user = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
+        #Needed to display correct form for each survey
+        vote_check = []
+        surveys_voted = db.execute("SELECT * FROM voted WHERE user = ?", session['user_id'])
+        for survey in surveys_voted:
+            vote_check.append(survey['survey'])
+
+        return render_template("surveys.html", surveys=surveys, user=user, vote_check=vote_check)
+
+#Below is the form handling 'cross-road' with branches for different input        
+@app.route("/handle_form", methods=["GET", "POST"])
+@login_required
+def handle_form():
+        
+        action = request.form['action']
+        survey_id = request.form.get('id')
+
+        if action == 'delete':
+            return redirect(url_for('delete', survey_id=survey_id))
+        elif action == 'vote':
+            return redirect(url_for('vote', survey_id=survey_id))
+        elif action == 'results':
+            return redirect(url_for('result', survey_id=survey_id))
+
+#the variable is passed in the rout...
+@app.route("/delete/<int:survey_id>", methods=["GET", "POST"])
+@login_required
+#... and then passed into the function as a parameter
+def delete(survey_id):
+    db.execute("DELETE FROM options WHERE survey = ?", survey_id)
+    db.execute("DELETE FROM voted WHERE survey = ?", survey_id)
+    db.execute("DELETE FROM surveys WHERE id = ?", survey_id)
+    return redirect(url_for("surveys"))
+
+@app.route("/vote/<int:survey_id>", methods=["GET", "POST"])
+@login_required
+def vote(survey_id):
+    question = db.execute("SELECT question FROM surveys WHERE id = ?", survey_id)[0]["question"]
+    options = db.execute("SELECT * FROM options WHERE survey = ?", survey_id)
+    
+    global OPTIONS
+    OPTIONS = []
+    for option in options:
+        OPTIONS.append(option['option'])
+
+    return render_template('vote.html', survey_id=survey_id, question=question, vote_options=OPTIONS)
+
+@app.route("/result/<int:survey_id>", methods=["GET", "POST"])
+@login_required
+def result(survey_id):
+
+        question = db.execute("SELECT question FROM surveys WHERE id = ?", survey_id)[0]["question"]
+        
+        labels = []
+        labels_dict = db.execute("SELECT option FROM options WHERE survey = ?", survey_id)
+        for label in labels_dict:
+            labels.append(label['option'])
+        
+        votes = []
+        votes_dict = db.execute("SELECT points FROM options WHERE survey= ?", survey_id)
+        for vote in votes_dict:
+            votes.append(vote['points'])
+
+        return render_template('result.html', question=question, labels=labels, votes=votes)
+
+
+#this should make the aplication update automaticly after changes but does not.
 if __name__ == "__main__":
     app.run(debug=True)

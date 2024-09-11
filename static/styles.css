@@ -4,3 +4,31 @@
 .popup {
     text-align: center;
 }
+table {
+    background-color: transparent;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+table th,
+table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+}
+
+tbody tr:nth-of-type(odd) {
+    background-color: rgb(179, 208, 255, 0.3)
+}
+.deleteButton {
+    margin-left: 5px;
+    cursor: pointer;
+}
+.deleteButton:hover {
+    text-decoration: underline;
+}
+#questionField {
+    width: 33%;
+}
+.option {
+    margin-right: 10px;
+}
