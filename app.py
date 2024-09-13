@@ -34,7 +34,17 @@ def index():
 
     username = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
 
-    return render_template("index.html", username=username)
+
+    # A.I helped with aliasing the AQL query
+    surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator ORDER BY survey_id DESC LIMIT 5")
+    user = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
+    #Needed to display correct form for each survey
+    vote_check = []
+    surveys_voted = db.execute("SELECT * FROM voted WHERE user = ?", session['user_id'])
+    for survey in surveys_voted:
+        vote_check.append(survey['survey'])
+
+    return render_template("index.html", username=username, surveys=surveys, user=user, vote_check=vote_check)
 
 @app.route("/generate", methods=["GET", "POST"])
 @login_required
@@ -203,15 +213,15 @@ def surveys():
 @login_required
 def handle_form():
         
-        action = request.form['action']
-        survey_id = request.form.get('id')
+    action = request.form['action']
+    survey_id = request.form.get('id')
 
-        if action == 'delete':
-            return redirect(url_for('delete', survey_id=survey_id))
-        elif action == 'vote':
-            return redirect(url_for('vote', survey_id=survey_id))
-        elif action == 'results':
-            return redirect(url_for('result', survey_id=survey_id))
+    if action == 'delete':
+        return redirect(url_for('delete', survey_id=survey_id))
+    elif action == 'vote':
+        return redirect(url_for('vote', survey_id=survey_id))
+    elif action == 'results':
+        return redirect(url_for('result', survey_id=survey_id))
 
 #the variable is passed in the rout...
 @app.route("/delete/<int:survey_id>", methods=["GET", "POST"])
@@ -240,19 +250,19 @@ def vote(survey_id):
 @login_required
 def result(survey_id):
 
-        question = db.execute("SELECT question FROM surveys WHERE id = ?", survey_id)[0]["question"]
-        
-        labels = []
-        labels_dict = db.execute("SELECT option FROM options WHERE survey = ?", survey_id)
-        for label in labels_dict:
-            labels.append(label['option'])
-        
-        votes = []
-        votes_dict = db.execute("SELECT points FROM options WHERE survey= ?", survey_id)
-        for vote in votes_dict:
-            votes.append(vote['points'])
+    question = db.execute("SELECT question FROM surveys WHERE id = ?", survey_id)[0]["question"]
+    
+    labels = []
+    labels_dict = db.execute("SELECT option FROM options WHERE survey = ?", survey_id)
+    for label in labels_dict:
+        labels.append(label['option'])
+    
+    votes = []
+    votes_dict = db.execute("SELECT points FROM options WHERE survey= ?", survey_id)
+    for vote in votes_dict:
+        votes.append(vote['points'])
 
-        return render_template('result.html', question=question, labels=labels, votes=votes)
+    return render_template('result.html', question=question, labels=labels, votes=votes)
 
 
 #this should make the aplication update automaticly after changes but does not.

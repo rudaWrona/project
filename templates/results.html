@@ -9,12 +9,14 @@
 {% endblock %}
 
 {% block main %}
-    <canvas id="chart"></canvas>
+    <div id="chartContainer"><canvas id="chart"></canvas></div>
 {% endblock %}
 
 {% block script %}
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        var maxValue = Math.max(...{{ votes }});
+        var y_axis_top = 1.1 * maxValue;
         var labels = {{ labels | tojson }};
         var points = {{ votes | tojson }};
         var ctx = document.getElementById('chart').getContext('2d');
@@ -30,6 +32,14 @@
                     borderWidth: 1
                 }]
             },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        suggestedMax: y_axis_top  // This makes the chart's y axis go a little bit above the highest bar.
+                    }
+                }
+            }
         });
     </script>
 {% endblock %}

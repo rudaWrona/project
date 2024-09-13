@@ -32,3 +32,13 @@ tbody tr:nth-of-type(odd) {
 .option {
     margin-right: 10px;
 }
+/* This needs an !important attribute in order to scale properly. It overwrites the styles produced by the chart script which fixed the sizes */
+#chart {
+    width: 75% !important;
+    height: auto !important;
+}
+#chartContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+}
