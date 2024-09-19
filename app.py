@@ -1,7 +1,7 @@
 import os #module, which provides a way to interact with the operating system
 
 from cs50 import SQL
-from flask import Flask, redirect, render_template, request, session, url_for
+from flask import Flask, redirect, render_template, request, session, url_for, jsonify
 from flask_session import Session #a tool for session administering on the server side
 from werkzeug.security import check_password_hash, generate_password_hash
 from datetime import datetime
@@ -103,6 +103,7 @@ def login():
             return render_template("login.html", warning=warning)
 
         session["user_id"] = user_check[0]["id"]
+        session["username"] = user_check[0]["username"]
 
         return redirect("/")        
 
@@ -264,7 +265,37 @@ def result(survey_id):
 
     return render_template('result.html', question=question, labels=labels, votes=votes)
 
+@app.route("/search")
+@login_required
+def search():
+    return render_template("search.html")
 
+
+@app.route("/search_response")
+@login_required
+def search_response():
+
+    q = request.args.get("q")
+    c = request.args.get("c")
+
+    if q:
+        surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE question LIKE ?", "%" + q + "%")
+    elif c:
+        surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE users.username LIKE ?", "%" + c + "%")
+    else:
+        surveys = []
+
+    user = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
+    
+    #Needed to display correct form for each survey
+    vote_check = []
+    surveys_voted = db.execute("SELECT * FROM voted WHERE user = ?", session['user_id'])
+    for survey in surveys_voted:
+        vote_check.append(survey['survey'])
+
+    #data sent as resposne to dynamic search on the user's side.
+    return jsonify(surveys=surveys, user=user, vote_check=vote_check)
+    
 #this should make the aplication update automaticly after changes but does not.
 if __name__ == "__main__":
     app.run(debug=True)

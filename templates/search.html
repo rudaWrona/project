@@ -1,0 +1,124 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Search
+{% endblock %}
+
+{% block header %}
+    
+{% endblock %}
+
+{% block main %}
+    <h2 class="popup">Search for a survey</h2>
+
+    <input class="search_input" type="search" name="q" placeholder="Search by survey's title">
+    <input class="search_input" type="search" name="c" placeholder="Search by survey's creator">
+
+    <table>
+        <thead>
+            <tr>
+                <th>Survey's title</th>
+                <th>ID</th>
+                <th>Time of creation</th>
+                <th>Creator</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+{% endblock %}
+
+{% block script %}
+
+    <script>
+        let input = document.querySelectorAll(".search_input")
+        input.forEach(function(search) {
+            search.addEventListener("input", async function() {
+
+                let q = document.querySelector('input[name="q"]');
+                let c = document.querySelector('input[name="c"]');
+
+                let response;
+                
+                if (q && q.value) {
+                    response = await fetch("/search_response?q=" + search.value);
+                }
+                else if (c && c.value) {
+                    response = await fetch("/search_response?c=" + search.value);
+                } 
+
+                //data will contain 3 different parts of resposne
+                let data = await response.json();
+                
+                //parts of response are set as JS variables for different logic operations. This is all carried out on the user's side based on data sent form the server as a response
+                let surveys = data.surveys;
+                let user = data.user
+                let vote_check = data.vote_check;
+
+                let table = document.querySelector("tbody");
+                table.innerHTML = "";
+                
+                surveys.forEach(function(survey) {
+                    let form = document.createElement("form");
+                    let row = document.createElement("tr");
+                    let form_input = document.createElement("input");
+                    let id = survey["survey_id"];
+                    let action = document.createElement("td");
+
+                    //Object.values() returns values of an object-parameter. forEach loop iterates through all the values returned
+                    Object.values(survey).forEach(function(value) {
+                        let cell = document.createElement("td");
+                        cell.innerHTML = value;
+                        row.appendChild(cell);
+                    })
+                    
+                    if (vote_check.includes(id)) {
+                        let button_results = document.createElement("button");
+                        button_results.innerHTML = "Show results";
+                        button_results.setAttribute("value", "results");
+                        button_results.setAttribute("type", "submit");
+                        button_results.setAttribute("name", "action");
+                        button_results.classList.add("btn");
+                        button_results.classList.add("btn-primary");
+                        form.appendChild(button_results);
+                    } else {
+                        let button_vote = document.createElement("button");
+                        button_vote.innerHTML = "Vote";
+                        button_vote.setAttribute("value", "vote");
+                        button_vote.setAttribute("type", "submit");
+                        button_vote.setAttribute("name", "action");
+                        button_vote.classList.add("btn");
+                        button_vote.classList.add("btn-primary");
+                        form.appendChild(button_vote);
+                    }
+                    if (survey.username == "{{  session['username'] }}") {
+                        let space = document.createElement("span");
+                        space.innerHTML = " / ";
+                        let button_delete = document.createElement("button");
+                        button_delete.innerHTML = "Delete";
+                        button_delete.setAttribute("value", "delete");
+                        button_delete.setAttribute("type", "submit");
+                        button_delete.setAttribute("name", "action");
+                        button_delete.classList.add("btn");
+                        button_delete.classList.add("btn-primary");
+                        form.appendChild(space);
+                        form.appendChild(button_delete);
+                    }
+
+                    form_input.setAttribute("value", id);
+                    form_input.setAttribute("name", "id");
+                    form_input.setAttribute("type", "hidden");
+                    form.setAttribute("action", "/handle_form");
+                    form.setAttribute("method", "post");
+            
+                    form.appendChild(form_input);
+                    action.appendChild(form);
+                    row.appendChild(action);                
+                    table.appendChild(row);
+            });
+        });
+    })
+    </script>
+
+{% endblock %}

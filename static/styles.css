@@ -42,3 +42,9 @@ tbody tr:nth-of-type(odd) {
     justify-content: center;
     align-items: center; 
 }
+#hello {
+    color: red;
+}
+.search_input {
+    width: 300px;
+}

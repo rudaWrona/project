@@ -28,10 +28,12 @@
                 <ul class="navbar-nav me-auto mt-2">
                     <li class="nav-item"><a class="nav-link" href="/generate">Make Survey</a></li>
                     <li class="nav-item"><a class="nav-link" href="/surveys">Current Surveys</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/search">Search</a></li>
                     <li class="nav-item"><a class="nav-link" href="/archive">Archive</a></li>
                     <li class="nav-item"><a class="nav-link" href="/account">Your account</a></li>
                 </ul>
                 <ul class="navbar-nav ms-auto mt-2">
+                    <li class="nav-item"><a class="nav-link" id="hello">Hello, {{ session["username"]  }}!</a></li>
                     <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
                 </ul>
             {% else %}
