@@ -271,16 +271,37 @@ def search():
     return render_template("search.html")
 
 
-@app.route("/search_response")
+@app.route("/search_responseq")
 @login_required
-def search_response():
+def search_responseq():
 
     q = request.args.get("q")
-    c = request.args.get("c")
 
     if q:
         surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE question LIKE ?", "%" + q + "%")
-    elif c:
+    #elif c:
+        #surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE users.username LIKE ?", "%" + c + "%")
+    else:
+        surveys = []
+
+    user = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
+    
+    #Needed to display correct form for each survey
+    vote_check = []
+    surveys_voted = db.execute("SELECT * FROM voted WHERE user = ?", session['user_id'])
+    for survey in surveys_voted:
+        vote_check.append(survey['survey'])
+
+    #data sent as resposne to dynamic search on the user's side.
+    return jsonify(surveys=surveys, user=user, vote_check=vote_check)
+
+@app.route("/search_responsec")
+@login_required
+def search_responsec():
+
+    c = request.args.get("c")
+
+    if c:
         surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE users.username LIKE ?", "%" + c + "%")
     else:
         surveys = []
