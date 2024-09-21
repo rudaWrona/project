@@ -316,7 +316,30 @@ def search_responsec():
 
     #data sent as resposne to dynamic search on the user's side.
     return jsonify(surveys=surveys, user=user, vote_check=vote_check)
+
+@app.route("/search_date", methods = ["GET", "POST"])
+@login_required
+def search_date():
+
     
+    if request.method == "POST":
+        start = request.form.get("date_start")
+        end = request.form.get("date_end")
+        
+        start += " 00.00.00" #This needs to be added at the end of the date string to match data in time column in surveys table
+        end += " 23:59:59"
+
+        surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE time BETWEEN ? AND ?", start, end)
+
+        user = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
+        
+        vote_check = []
+        surveys_voted = db.execute("SELECT * FROM voted WHERE user = ?", session['user_id'])
+        for survey in surveys_voted:
+            vote_check.append(survey['survey'])
+
+        return render_template("search.html", surveys=surveys, user=user, vote_check=vote_check)
+
 #this should make the aplication update automaticly after changes but does not.
 if __name__ == "__main__":
     app.run(debug=True)

@@ -35,11 +35,13 @@
                 <ul class="navbar-nav ms-auto mt-2">
                     <li class="nav-item"><a class="nav-link" id="hello">Hello, {{ session["username"]  }}!</a></li>
                     <li class="nav-item"><a class="nav-link" href="/logout">Log Out</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
                 </ul>
             {% else %}
                 <ul class="navbar-nav ms-auto mt-2">
                     <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
                     <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
                 </ul>
             {% endif %}
         </div>
