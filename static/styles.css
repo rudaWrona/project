@@ -4,3 +4,65 @@
 .popup {
     text-align: center;
 }
+table {
+    background-color: transparent;
+    margin-bottom: 1rem;
+    width: 100%;
+}
+
+table th,
+table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+}
+
+tbody tr:nth-of-type(odd) {
+    background-color: rgb(179, 208, 255, 0.3)
+}
+.deleteButton {
+    margin-left: 5px;
+    cursor: pointer;
+}
+.deleteButton:hover {
+    text-decoration: underline;
+}
+#registerLink {
+    text-decoration: none;
+    cursor: pointer;
+}
+#registerLink:hover {
+    text-decoration: underline;
+}
+#questionField {
+    width: 33%;
+}
+.option {
+    margin-right: 10px;
+}
+/* This needs an !important attribute in order to scale properly. It overwrites the styles produced by the chart script which fixed the sizes */
+#chart {
+    width: 75% !important;
+    height: auto !important;
+}
+#chartContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+}
+#hello {
+    color: red;
+}
+#voteOptions {
+    list-style-type: none;
+}
+.search_input {
+    width: 300px;
+}
+@media (max-width: 480px) {
+    body {
+        font-size: 0.75rem;
+    }
+    .btn {
+        font-size: 0.75rem;
+    }
+}

@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Surveys
+{% endblock %}
+
+{% block header %}
+    
+{% endblock %}
+
+{% block main %}
+<h2 style="text-align: center";>Available surveys</h2>
+{# table taken from Bithdays from problem set 9 #}
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Survey's title</th>
+            <th>Creator</th>
+            <th>Time of creation</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for survey in surveys %}
+            <form action="/osurgen/handle_form" method="post">
+                <tr>
+                    <td>{{ survey['survey_id'] }}</td>
+                    <td>{{ survey['question'] }}</td>
+                    <td>{{ survey['username'] }}</td>
+                    <td>{{ survey['time'] }}</td>
+                    <input name="id" type="hidden" value="{{ survey['survey_id'] }}">
+                    <td>                 
+                    {% if survey['survey_id'] in vote_check: %}
+                        <button class="btn btn-primary" type="submit" name="action" value="results">Show results</button>
+                    {% else: %}
+                        <button class="btn btn-primary" type="submit" name="action" value="vote">Vote</button>                        
+                    {% endif %}
+
+                    {% if user == survey["username"]: %}
+                        /
+                            <button class="btn btn-primary" type="submit" name="action" value="delete">Delete</button>
+                    {% endif %}
+                    </td>
+                </tr>
+            </form>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

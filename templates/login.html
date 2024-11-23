@@ -11,7 +11,7 @@
 {% block main %}
     <fieldset class="fieldset">
         <legend>Log in to Online Survey Generator</legend>
-        <form action="/login" method="post">
+        <form action="/osurgen/login" method="post">
             <div class="mb-3">
                 <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="username" placeholder="Username" type="text">
             </div>
@@ -20,5 +20,7 @@
             </div>
             <button class="btn btn-primary" type="submit">Log In</button>
         </form>
+        <br>
+        <p>Or <a id="registerLink" href="{{ url_for('register') }}">register</a></p>
     </fieldset>
 {% endblock %}
