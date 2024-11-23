@@ -20,7 +20,7 @@
             <input id="search_inputc" class="form-control" type="search" name="c" autocomplete="off" placeholder="Search by survey's creator">
         </div>
         <div class="col-6 d-flex flex-column">
-            <form action="/search_date" method="post">
+            <form action="/osurgen/search_date" method="post">
                 <fieldset>
                 <legend>
                     Search by date range:
@@ -57,7 +57,7 @@
         </thead>
         <tbody>
             {% for survey in surveys %}
-            <form action="/handle_form" method="post">
+            <form action="/osurgen/handle_form" method="post">
                 <tr>
                     <td>{{ survey['question'] }}</td>
                     <td>{{ survey['survey_id'] }}</td>
@@ -74,8 +74,6 @@
                     {% if user == survey["username"]: %}
                         /
                             <button class="btn btn-primary" type="submit" name="action" value="delete">Delete</button>
-                        /
-                            <button class="btn btn-primary" type="submit" name="action" value="edit">Edit</button>
                     {% endif %}
                     </td>
                 </tr>
@@ -91,12 +89,12 @@
         let inputq = document.querySelector("#search_inputq")
         inputq.addEventListener("input", async function() {
 
-            response = await fetch("/search_responseq?q=" + inputq.value);
+            response = await fetch("/osurgen/search_responseq?q=" + inputq.value);
 
             //data will contain 3 different parts of resposne
             let data = await response.json();
             
-            //parts of response are set as JS variables for different logic operations. This is all carried out on the user's side based on data sent form the server as a response
+            //parts of response are set as JS variables for different logic operations. This is all carried out on the user's side based on data sent from the server as a response
             let surveys = data.surveys;
             let user = data.user
             let vote_check = data.vote_check;
@@ -154,19 +152,20 @@
                 form_input.setAttribute("value", id);
                 form_input.setAttribute("name", "id");
                 form_input.setAttribute("type", "hidden");
-                form.setAttribute("action", "/handle_form");
+                form.setAttribute("action", "/osurgen/handle_form");
                 form.setAttribute("method", "post");
         
                 form.appendChild(form_input);
                 action.appendChild(form);
                 row.appendChild(action);                
                 table.appendChild(row);
+            });
         });
-    });
-    let inputc = document.querySelector("#search_inputc")
+        
+        let inputc = document.querySelector("#search_inputc")
         inputc.addEventListener("input", async function() {
 
-            response = await fetch("/search_responsec?c=" + inputc.value);
+            response = await fetch("/osurgen/search_responsec?c=" + inputc.value);
 
             //data will contain 3 different parts of resposne
             let data = await response.json();
@@ -229,15 +228,15 @@
                 form_input.setAttribute("value", id);
                 form_input.setAttribute("name", "id");
                 form_input.setAttribute("type", "hidden");
-                form.setAttribute("action", "/handle_form");
+                form.setAttribute("action", "/osurgen/handle_form");
                 form.setAttribute("method", "post");
         
                 form.appendChild(form_input);
                 action.appendChild(form);
                 row.appendChild(action);                
                 table.appendChild(row);
+            });
         });
-    });
     </script>
 
 {% endblock %}

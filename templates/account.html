@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Your account
+{% endblock %}
+
+{% block header %}
+    <p class="popup">{{ warning }}</p>
+{% endblock %}
+
+{% block main %}
+
+<h2 class="popup">Change your password</h2>
+
+<form action="/osurgen/account" method="post">
+    <fieldset class="fieldset">
+        <div class="mb-3">
+            <div class="mb-3">
+                <input autocomplete="off" autofocus class="form-control mx-auto w-auto" name="oldPassword" placeholder="Old password" type="text">
+            </div>
+            <div class="mb-3">
+                <input class="form-control mx-auto w-auto" name="newPassword" placeholder="New password" type="text">
+            </div>
+            <div>
+                <input class="form-control mx-auto w-auto" name="confirmation" placeholder="Repeat new password" type="text">
+            </div>
+            <br>
+            <div>
+                <button class="btn btn-primary" type="submit">Change password</button>
+            </div>
+        </div>
+    </fieldset>
+</form>
+
+
+
+
+{% endblock %}

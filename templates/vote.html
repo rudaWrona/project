@@ -12,13 +12,17 @@
 {% block main %}
 <fieldset class="fieldset">
     <legend>{{ question }}</legend>
-    <form action="/results" method="post">
+    <form action="/osurgen/results" method="post">
         <div class="mb-3">
             <input type="hidden" name="survey" value="{{ survey_id }}">
+            <ul>
             {% for option in vote_options %}
-            <input name="chosen" type="radio" value="{{ option }}" required>
-            <label class="option">{{ option }}</label>
+                <li id="voteOptions">
+                    <input name="chosen" type="radio" value="{{ option }}" required>
+                    <label class="option">{{ option }}</label>
+                </li>
             {% endfor %}
+            </ul>
         </div>
 
         <button class="btn btn-primary" type="submit">Vote</button>

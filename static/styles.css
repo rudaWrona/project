@@ -26,6 +26,13 @@ tbody tr:nth-of-type(odd) {
 .deleteButton:hover {
     text-decoration: underline;
 }
+#registerLink {
+    text-decoration: none;
+    cursor: pointer;
+}
+#registerLink:hover {
+    text-decoration: underline;
+}
 #questionField {
     width: 33%;
 }
@@ -45,6 +52,17 @@ tbody tr:nth-of-type(odd) {
 #hello {
     color: red;
 }
+#voteOptions {
+    list-style-type: none;
+}
 .search_input {
     width: 300px;
+}
+@media (max-width: 480px) {
+    body {
+        font-size: 0.75rem;
+    }
+    .btn {
+        font-size: 0.75rem;
+    }
 }

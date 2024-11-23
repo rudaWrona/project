@@ -10,6 +10,7 @@ from helpers import login_required
 
 app = Flask(__name__) #initiates Flask application, gives name to app
 
+app.config['APPLICATION_ROOT'] = '/osurgen'
 app.config["SESSION_PERMANENT"] = False #session will  be concludet when conncetion terminates.
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app) #commences session so that session files could be administerd on the server side
@@ -36,7 +37,7 @@ def index():
 
 
     # A.I helped with aliasing the AQL query
-    surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator ORDER BY survey_id DESC LIMIT 5")
+    surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE status = 'active' ORDER BY survey_id DESC LIMIT 5")
     user = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
     #Needed to display correct form for each survey
     vote_check = []
@@ -75,7 +76,7 @@ def generate():
                        survey, option)
 
 
-        return redirect("/surveys")
+        return redirect(url_for('surveys'))
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -105,7 +106,7 @@ def login():
         session["user_id"] = user_check[0]["id"]
         session["username"] = user_check[0]["username"]
 
-        return redirect("/")        
+        return redirect(url_for('index'))        
 
 @app.route("/logout")
 def logout():
@@ -115,7 +116,7 @@ def logout():
     session.clear()
 
     # Redirect user to login form
-    return redirect("/")
+    return redirect(url_for('index'))
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -199,7 +200,7 @@ def surveys():
 
     if request.method == "GET":
         # A.I helped with aliasing the AQL query
-        surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator")
+        surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE status = 'active'")
         user = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
         #Needed to display correct form for each survey
         vote_check = []
@@ -229,9 +230,10 @@ def handle_form():
 @login_required
 #... and then passed into the function as a parameter
 def delete(survey_id):
-    db.execute("DELETE FROM options WHERE survey = ?", survey_id)
-    db.execute("DELETE FROM voted WHERE survey = ?", survey_id)
-    db.execute("DELETE FROM surveys WHERE id = ?", survey_id)
+    db.execute("UPDATE surveys SET status = 'deleted' WHERE id =?", survey_id)
+    #db.execute("DELETE FROM options WHERE survey = ?", survey_id)
+    #db.execute("DELETE FROM voted WHERE survey = ?", survey_id)
+    #db.execute("DELETE FROM surveys WHERE id = ?", survey_id)
     return redirect(url_for("surveys"))
 
 @app.route("/vote/<int:survey_id>", methods=["GET", "POST"])
@@ -278,9 +280,7 @@ def search_responseq():
     q = request.args.get("q")
 
     if q:
-        surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE question LIKE ?", "%" + q + "%")
-    #elif c:
-        #surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE users.username LIKE ?", "%" + c + "%")
+        surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE question LIKE ? AND status = 'active'", "%" + q + "%")
     else:
         surveys = []
 
@@ -302,7 +302,7 @@ def search_responsec():
     c = request.args.get("c")
 
     if c:
-        surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE users.username LIKE ?", "%" + c + "%")
+        surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE users.username LIKE ? AND status = 'active'", "%" + c + "%")
     else:
         surveys = []
 
@@ -329,7 +329,7 @@ def search_date():
         start += " 00.00.00" #This needs to be added at the end of the date string to match data in time column in surveys table
         end += " 23:59:59"
 
-        surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE time BETWEEN ? AND ?", start, end)
+        surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE time BETWEEN ? AND ? AND status = 'active'", start, end)
 
         user = db.execute("SELECT username FROM users WHERE id = ?", session["user_id"])[0]["username"]
         
@@ -340,6 +340,46 @@ def search_date():
 
         return render_template("search.html", surveys=surveys, user=user, vote_check=vote_check)
 
-#this should make the aplication update automaticly after changes but does not.
-if __name__ == "__main__":
-    app.run(debug=True)
+@app.route("/archive")
+@login_required
+def archive():
+
+    surveys = db.execute("SELECT surveys.id AS survey_id, surveys.question, surveys.time, users.username FROM surveys JOIN users ON users.id = surveys.creator WHERE status = 'deleted'")
+
+    return render_template("archive.html", surveys=surveys)
+
+@app.route("/account", methods = ["GET", "POST"])
+@login_required
+def account():
+
+    if request.method == "GET":
+        return render_template("account.html")
+    else:
+        old_password = db.execute("SELECT hash FROM users WHERE id = ?",
+                                  session["user_id"])[0]["hash"]
+        
+        if not check_password_hash(old_password, request.form.get("oldPassword")):
+            warning = "Invalid password"
+            return render_template("account.html", warning=warning)
+        if not request.form.get("oldPassword"):
+            warning = "Provide your old password"
+            return render_template("account.html", warning=warning)
+        if not request.form.get("newPassword"):
+            warning = "Must provide valid new password"
+            return render_template("account.html", warning=warning)
+        if request.form.get("oldPassword") == request.form.get("newPassword"):
+            warning = "New passwrod must be different than old password"
+            return render_template("account.html", warning=warning)
+        if request.form.get("newPassword") != request.form.get("confirmation"):
+            warning = "Repeated password must be the same as new password"
+            return render_template("account.html", warning=warning)
+        
+        new_password = generate_password_hash(request.form.get("newPassword"))
+        db.execute("UPDATE users SET hash = ? WHERE id =?", new_password, session["user_id"])
+
+        session.clear()
+        return render_template("login.html")
+
+@app.route("/about")
+def about():
+    return render_template("about.html")

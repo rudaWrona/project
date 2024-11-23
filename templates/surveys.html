@@ -23,7 +23,7 @@
     </thead>
     <tbody>
         {% for survey in surveys %}
-            <form action="/handle_form" method="post">
+            <form action="/osurgen/handle_form" method="post">
                 <tr>
                     <td>{{ survey['survey_id'] }}</td>
                     <td>{{ survey['question'] }}</td>
@@ -40,8 +40,6 @@
                     {% if user == survey["username"]: %}
                         /
                             <button class="btn btn-primary" type="submit" name="action" value="delete">Delete</button>
-                        /
-                            <button class="btn btn-primary" type="submit" name="action" value="edit">Edit</button>
                     {% endif %}
                     </td>
                 </tr>
